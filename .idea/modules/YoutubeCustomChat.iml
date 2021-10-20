@@ -5,6 +5,7 @@
     <content url="file://$MODULE_DIR$/../../Server">
       <excludeFolder url="file://$MODULE_DIR$/../../Server/.gradle" />
       <excludeFolder url="file://$MODULE_DIR$/../../Server/build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../Server/.idea" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
