@@ -1,1 +1,0 @@
-worker: java -jar Server/build/libs/YoutubeCustomChat-1.0-SNAPSHOT-all.jar
