@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');
+
+/*html, body {
+    height: 100%;
+}*/
+
+div#container {
+    display: flex;
+    overflow: hidden;
+    height: 100%;
+}
+
+div#sidebar {
+    flex-basis: 15%;
+    left: 0;
+}
+
+div#video {
+    --width: 65%;
+
+    flex-basis: var(--width);
+    position: relative;
+    overflow: hidden;
+    width: var(--width);
+    padding-top: calc(var(--width)*0.5625); /* 56.25%;*/
+    height: calc(var(--width)*0.5625);
+}
+    div#video iframe.video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+div#chat {
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    flex-basis: 20%;
+    float: right;
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 100%;
+}
+    div#chatheader {
+        flex-basis: 10%;
+        display: flex;
+        flex-flow: column;
+        align-content: center;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    
+        div#chatheader span.title {
+            align-self: center;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+    
+    div#chatbox-container {
+        position: inherit;
+    }
+    div#chatbox {
+        flex-basis: 80%;
+        overflow-y: scroll;
+        width: 100%;
+        
+        display: table;
+    }
+
+    div.chatitem {
+        display: block;
+        margin-top: 7px;
+        margin-bottom: 7px;
+    }
+        div.chatitem span {
+            font-size: 12pt;
+        }
+
+        div.chatitem span.name {
+            font-weight: 800;
+        }
+
+        div.chatitem span.msg {
+            font-size: 11pt;
+        }
+        
+    div#chatfooter {
+        flex-basis: 10%;
+        display: block;
+        position: relative;
+        margin-top: 7px;
+        bottom: 0;
+        width: 100%;
+    }
+        div#chatfooter form#chatinput {
+            display: flex;
+        }
+
+            form#chatinput input.text {
+                flex-basis: 80%;
+            }
+
+            form#chatinput input.button {
+                flex-basis: 10%;
+            }
+
+@media screen and (max-width: 768px){
+    div#container {
+        display: block;
+    }
+    div#video {
+        width: 100%;
+        padding-top: 56.25%;
+    }
+    div#chat {
+        float: none;
+        width: 100%;
+    }
+}
