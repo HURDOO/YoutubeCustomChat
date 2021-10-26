@@ -2,12 +2,14 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1_Coding-YoutubeCustomChat.iml" filepath="$PROJECT_DIR$/.idea/modules/1_Coding-YoutubeCustomChat.iml" group="YoutubeCustomChat" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Server-Jersey.iml" filepath="$PROJECT_DIR$/.idea/modules/Server-Jersey.iml" group="YoutubeCustomChat/Server-Jersey" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Server-Jersey/Server-Jersey_main.iml" filepath="$PROJECT_DIR$/.idea/modules/Server-Jersey/Server-Jersey_main.iml" group="YoutubeCustomChat/Server-Jersey" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Server-Jersey/Server-Jersey_test.iml" filepath="$PROJECT_DIR$/.idea/modules/Server-Jersey/Server-Jersey_test.iml" group="YoutubeCustomChat/Server-Jersey" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/YoutubeCustomChat.iml" filepath="$PROJECT_DIR$/.idea/modules/YoutubeCustomChat.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/YoutubeCustomChat.main.iml" filepath="$PROJECT_DIR$/.idea/modules/YoutubeCustomChat.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/YoutubeCustomChat.test.iml" filepath="$PROJECT_DIR$/.idea/modules/YoutubeCustomChat.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/kr.kro.hurdoo.YoutubeCustomChat.iml" filepath="$PROJECT_DIR$/.idea/modules/kr.kro.hurdoo.YoutubeCustomChat.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/kr.kro.hurdoo.YoutubeCustomChat.main.iml" filepath="$PROJECT_DIR$/.idea/modules/kr.kro.hurdoo.YoutubeCustomChat.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/kr.kro.hurdoo.YoutubeCustomChat.test.iml" filepath="$PROJECT_DIR$/.idea/modules/kr.kro.hurdoo.YoutubeCustomChat.test.iml" />
     </modules>
   </component>
 </project>

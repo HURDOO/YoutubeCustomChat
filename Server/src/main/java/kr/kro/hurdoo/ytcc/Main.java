@@ -7,6 +7,8 @@ public class Main {
         int port;
         if(System.getenv().containsKey("PORT")) port = Integer.parseInt(System.getenv("PORT"));
         else port = 8080;
+        for(int i=0;i<10;i++) new Thread(HttpRequestParser::loop).start();
+
         try {
             MainServer server = new MainServer(port);
         } catch (IOException e) {

@@ -3,18 +3,14 @@ package kr.kro.hurdoo.ytcc;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
 
 public class MainServer {
     public static MainServer instance;
 
     private final ServerSocket server;
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
+    //private final ExecutorService executor = Executors.newFixedThreadPool(40);
 
     public MainServer(int port) throws IOException {
         instance = this;
@@ -27,25 +23,29 @@ public class MainServer {
         while(true) {
             try {
                 Socket socket = server.accept();
+                /*executor.execute(() -> {
+                    HttpRequestData data = new HttpRequestData(socket);
+                });*/
+
                 InputStreamReader reader = new InputStreamReader(socket.getInputStream());
                 int cnt = 0;
                 int i;
-                String line = "";
                 StringBuilder str = new StringBuilder();
+                StringBuilder line = new StringBuilder();
                 int content_length = -1;
                 boolean bodyStart = false;
 
                 while((i = reader.read()) != -1) {
                     //System.out.print(i + " ");
-                    line += Character.toString(i);
+                    line.append(Character.toString(i));
 
                     if(i == 10) // \n (CR = 13, LF = 10)
                     {
                         str.append(line);
-                        if(line.startsWith("Content-Length"))
-                            content_length = Integer.parseInt(line.split(" ")[1].split(Character.toString(13))[0]);
-                        if(line.equals(Character.toString(13) + Character.toString(10))) bodyStart = true;
-                        line = "";
+                        if(line.toString().startsWith("Content-Length"))
+                            content_length = Integer.parseInt(line.toString().split(" ")[1].split(Character.toString(13))[0]);
+                        if(line.toString().equals("\r\n") )bodyStart = true; //Character.toString(13) + Character.toString(10))
+                        line = new StringBuilder();
                     }
 
                     if(bodyStart)
@@ -68,23 +68,7 @@ public class MainServer {
                 }
                 System.out.println(str);
 
-                /*BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String s,str = "";
-                while((s = reader.readLine()) != null) {
-                    str += s + "\n";
-                    System.out.println(s.length());
-                }
-                System.out.println(str);*/
-
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                writer.write(BROWSER_MESSAGE);
-                writer.flush();
-                writer.close();
-                socket.close();
-
-                Future<?> future = executor.submit(() -> {
-                    HttpRequestParser.parseData(new HttpRequestData(socket,str.toString()));
-                });
+                HttpRequestParser.addToWaitingQueue(socket,str.toString());
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -93,10 +77,11 @@ public class MainServer {
     }
 
     private synchronized Socket getSocket() throws IOException {
-        return server.accept();
+        // return server.accept();
+        return null;
     }
 
-    private static final String BROWSER_MESSAGE = "" +
+    public static final String BROWSER_MESSAGE = "" +
             "HTTP/1.1 200 OK\r\n" +
             "Content-Type: text/html; charset=UTF-8\r\n" +
             "\r\n" +

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class HttpRequestData {
-    private Socket socket;
+    private final Socket socket;
     private final String raw;
 
     private String requestMethod;
