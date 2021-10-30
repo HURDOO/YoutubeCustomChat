@@ -129,9 +129,15 @@ public class HttpRequestParser {
         StringBuilder str = new StringBuilder();
 
         while(true) { // REQUEST_METHOD
-            i = reader.read();
-            if(i == ' ') break;
-            str.append(Character.toString(i));
+            try {
+                i = reader.read();
+                if(i == ' ') break;
+                if(i == -1) continue;
+                str.append(Character.toString(i));
+            } catch(IOException e) {
+                e.printStackTrace();
+                return;
+            }
         }
         data.setRequestMethod(str.toString());
         str.setLength(0);
