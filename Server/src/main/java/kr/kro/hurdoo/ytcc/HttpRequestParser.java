@@ -17,7 +17,11 @@ public class HttpRequestParser {
             parseData(data);
 
             if(data.getHeader().get("Connection").equalsIgnoreCase("Upgrade")) {
-                String ws_key = data.getHeader().get("Sec-WebSocket-Key") + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+                String ws_key;
+                if(data.getHeader().containsKey("Sec-WebSocket-Key")) ws_key = data.getHeader().get("Sec-WebSocket-Key");
+                else if(data.getHeader().containsKey("Sec-Websocket-Key")) ws_key = data.getHeader().get("Sec-Websocket-Key");
+                else throw new IOException("Cannot find websocket key");
+                ws_key += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
                 System.out.println("origin : " + ws_key);
                 MessageDigest digest = MessageDigest.getInstance("SHA-1");
                 digest.update(ws_key.getBytes());
@@ -63,6 +67,7 @@ public class HttpRequestParser {
                             break;
                         case 1:
                             System.out.println(str);
+                            str.setLength(0);
                             break;
                         case 8:
                             socketClosed = true;
