@@ -188,6 +188,7 @@ public class HttpRequestParser {
 
             if(key == null) break;
             data.getHeader().put(key,str.toString());
+            System.out.println("Saved Header: " + key + " -> " + str);
             str.setLength(0);
         }
 
