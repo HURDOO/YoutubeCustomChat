@@ -4,25 +4,18 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.io.*;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class HttpRequestParser {
     private static final Gson gson = new Gson();
-    public static LinkedBlockingQueue<HttpRequestData> waiting = new LinkedBlockingQueue<>();
 
-    public static void addToWaitingQueue(Socket socket,String data) {
-        waiting.offer(new HttpRequestData(socket,data));
-    }
-
-    public static void loop() {
+    public static void loop(HttpRequestData data) {
         try {
-            HttpRequestData data = parseData(getNewData());
+            parseData(data);
+
             if(data.getHeader().get("Connection").equalsIgnoreCase("Upgrade")) {
                 sendMessage(data,"HTTP/1.1 101 Switching Protocols\r\n"
                         + "Connection: Upgrade\r\n"
@@ -31,13 +24,15 @@ public class HttpRequestParser {
                         + Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-1").digest((data.getHeader().get("Sec-WebSocket-Key") + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").getBytes(StandardCharsets.UTF_8)))
                         + "\r\n\r\n");
 
-                InputStream in = data.getSocket().getInputStream();
+                InputStream in = data.getIn();
+                StringBuilder str = new StringBuilder();
                 while(true) {
                     /*data.getSocket().getOutputStream().write("Waiting for input\n".getBytes());
                     data.getSocket().getOutputStream().flush();*/
                     if(in.available() <= 0) continue;
 
-                    if((in.read() & 127) != 1) throw new IOException("Not a text message");
+                    int type = in.read() & 127;
+                    //if((in.read() & 127) != 1) throw new IOException("Not a text message");
                     int length = in.read() & 127;
 
                     int[] key = new int[4];
@@ -50,13 +45,28 @@ public class HttpRequestParser {
                         msg[i] = (byte) (in.read() ^ key[i%4]);
                     }
 
-                    System.out.println(new String(msg));
+                    str.append(new String(msg));
+
+                    boolean socketClosed = false;
+                    switch (type) {
+                        case 0:
+                            break;
+                        case 1:
+                            System.out.println(str);
+                            break;
+                        case 8:
+                            socketClosed = true;
+                            break;
+                        default:
+                            throw new IOException("Unknown WebSocket type: " + type);
+                    }
+                    if(socketClosed) break;
                 }
             }
             else {
-                sendMessage(data,MainServer.BROWSER_MESSAGE);
+                sendMessage(data, SocketAcceptingServer.BROWSER_MESSAGE);
             }
-        } catch (InterruptedException | IOException | NoSuchAlgorithmException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
@@ -68,44 +78,109 @@ public class HttpRequestParser {
         //writer.close();
     }
 
-    public static HttpRequestData parseData(HttpRequestData data) {
-        String[] raw = data.getRaw().split(Character.toString(13) + Character.toString(10));
+    private static void handleSocketInput(HttpRequestData data) throws IOException {
+        InputStream in = data.getIn();
+        StringBuilder str = new StringBuilder();
 
-        String[] connInfo = raw[0].split(" ");
-        data.setRequestMethod(connInfo[0]);
-        String[] path = connInfo[1].replace("%3F","?").split("\\?");
-        data.setPath(path[0]);
-        String[] queries = connInfo[1].replace("%26","&").split("&");
-        int cnt=1;
-        while(cnt < path.length) {
-            String[] query = queries[cnt].replace("%3D","=").split("=");
-            data.getParam().put(query[0],query[1]);
-            cnt++;
+        if(in.available() <= 0) return;
+
+        int type = in.read();
+        boolean fin = (type & 128) > 0;
+        if((type & 64) > 0 || (type & 32) > 0 || (type & 16) > 0)
+            throw new IOException("Cannot use RSV code; received byte: " + type);
+        // OPCode
+
+        boolean mask = (type & 8) > 0;
+
+        int lengthByte = in.read();
+        int length = lengthByte & 127;
+
+        int[] key = new int[4];
+        for(int i=0;i<4;i++) {
+            key[i] = in.read();
         }
 
-        cnt=1;
-        String line = raw[cnt];
-        while(line.length() > 0 && cnt < raw.length) {
-            String[] lines = line.split(":");
-            String key = lines[0];
-            StringBuilder value = new StringBuilder();
-            for(int i=1;i<lines.length;i++) value.append(lines[i]);
-            data.getHeader().put(key, value.substring(1));
-
-            line = raw[cnt];
-            cnt++;
+        byte[] msg = new byte[length];
+        for(int i=0;i<length;i++) {
+            msg[i] = (byte) (in.read() ^ key[i%4]);
         }
 
-        StringBuilder body = new StringBuilder();
-        while(cnt < raw.length) {
-            body.append(raw[cnt]).append("\n");
-            cnt++;
+        str.append(new String(msg));
+
+        boolean socketClosed = false;
+        switch (type) {
+            case 0:
+                break;
+            case 1:
+                System.out.println(str);
+                break;
+            case 8:
+                socketClosed = true;
+                break;
+            default:
+                throw new IOException("Unknown WebSocket type: " + type);
         }
-        data.setBody(gson.fromJson(body.toString(), JsonObject.class));
-        return data;
     }
 
-    private static synchronized HttpRequestData getNewData() throws InterruptedException {
-        return waiting.take();
+    public static void parseData(HttpRequestData data) throws IOException {
+
+        int i;
+        InputStreamReader reader = data.getReader();
+        StringBuilder str = new StringBuilder();
+
+        while(true) { // REQUEST_METHOD
+            i = reader.read();
+            if(i == ' ') break;
+            str.append(Character.toString(i));
+        }
+        data.setRequestMethod(str.toString());
+        str.setLength(0);
+
+        while(true) { // PATH
+            i = reader.read();
+            if(i == ' ') break;
+            str.append(Character.toString(i));
+        }
+        data.setPath(str.toString());
+        str.setLength(0);
+
+        while(true) { // HTTP_VERSION
+            i = reader.read();
+            if(i == '\r') continue;
+            if(i == '\n') break;
+            str.append(Character.toString(i));
+        }
+        data.setHttpVersion(str.toString());
+        str.setLength(0);
+
+        while(true) { // headers
+            String key = null;
+
+            while(true) { // header
+                i = reader.read();
+                if(i == ':') {
+                    key = str.toString();
+                    str.setLength(0);
+                    reader.read(); // remove space
+                    continue;
+                }
+                if(i == '\r') continue;
+                if(i == '\n') break;
+                str.append(Character.toString(i));
+            }
+
+            if(key == null) break;
+            data.getHeader().put(key,str.toString());
+            str.setLength(0);
+        }
+
+        if(!data.getHeader().containsKey("Content-length")) return;
+        int length = Integer.parseInt(data.getHeader().get("Content-length"));
+        for(int j=0;j<length;j++) {
+            i = reader.read();
+            if(i > 127) j += 2;
+            str.append(Character.toString(i));
+        }
+        data.setBody(gson.fromJson(str.toString(),JsonObject.class));
     }
 }

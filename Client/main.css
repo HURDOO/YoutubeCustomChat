@@ -4,6 +4,10 @@
     height: 100%;
 }*/
 
+body {
+    margin: 0px;
+}
+
 div#container {
     display: flex;
     overflow: hidden;
@@ -45,10 +49,9 @@ div#chat {
     float: right;
     margin-left: 10px;
     margin-right: 10px;
-    height: 100%;
+    height: 100vh;
 }
     div#chatheader {
-        flex-basis: 10%;
         display: flex;
         flex-flow: column;
         align-content: center;
@@ -61,53 +64,47 @@ div#chat {
             margin-top: 0;
             margin-bottom: 0;
         }
-    
-    div#chatbox-container {
-        position: inherit;
-    }
+
     div#chatbox {
-        flex-basis: 80%;
         overflow-y: scroll;
         width: 100%;
-        
-        display: table;
     }
 
-    div.chatitem {
-        display: block;
-        margin-top: 7px;
-        margin-bottom: 7px;
-    }
-        div.chatitem span {
-            font-size: 12pt;
+        div.chatitem {
+            display: block;
+            margin-top: 7px;
+            margin-bottom: 7px;
         }
+            div.chatitem span {
+                font-size: 12pt;
+            }
 
-        div.chatitem span.name {
-            font-weight: 800;
-        }
+            div.chatitem span.name {
+                font-weight: 800;
+            }
 
-        div.chatitem span.msg {
-            font-size: 11pt;
-        }
+            div.chatitem span.msg {
+                font-size: 11pt;
+            }
         
     div#chatfooter {
-        flex-basis: 10%;
         display: block;
         position: relative;
         margin-top: 7px;
+        margin-bottom: 7px;
         bottom: 0;
-        width: 100%;
     }
         div#chatfooter form#chatinput {
             display: flex;
         }
 
-            form#chatinput input.text {
-                flex-basis: 80%;
+            form#chatinput input[type=text] {
+                flex-basis: 90%;
             }
 
-            form#chatinput input.button {
+            form#chatinput button {
                 flex-basis: 10%;
+                word-wrap: normal;
             }
 
 @media screen and (max-width: 768px){
@@ -121,5 +118,6 @@ div#chat {
     div#chat {
         float: none;
         width: 100%;
+        height: 100%;
     }
 }
