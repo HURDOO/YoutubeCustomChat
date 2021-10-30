@@ -66,6 +66,8 @@ public class HttpRequestParser {
             else {
                 sendMessage(data, SocketAcceptingServer.BROWSER_MESSAGE);
             }
+            data.getSocket().getOutputStream().close();
+            data.getSocket().close();
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -75,7 +77,6 @@ public class HttpRequestParser {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(data.getSocket().getOutputStream()));
         writer.write(content);
         writer.flush();
-        //writer.close();
     }
 
     private static void handleSocketInput(HttpRequestData data) throws IOException {
