@@ -17,11 +17,21 @@ public class HttpRequestParser {
             parseData(data);
 
             if(data.getHeader().get("Connection").equalsIgnoreCase("Upgrade")) {
+                String ws_key = data.getHeader().get("Sec-WebSocket-Key") + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+                System.out.println("origin : " + ws_key);
+                MessageDigest digest = MessageDigest.getInstance("SHA-1");
+                digest.update(ws_key.getBytes());
+                byte[] sha1 = digest.digest();
+                System.out.println("sha1(byte) : " + sha1);
+                System.out.println("sha1(string) : " + new String(sha1));
+                byte[] base64 = Base64.getEncoder().encode(sha1);
+                System.out.println("base64(byte) : " + base64);
+                System.out.println("base64(string) : " + new String(base64));
                 sendMessage(data,"HTTP/1.1 101 Switching Protocols\r\n"
                         + "Connection: Upgrade\r\n"
                         + "Upgrade: websocket\r\n"
-                        + "Sec-WebSocket-Accept: "
-                        + Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-1").digest((data.getHeader().get("Sec-WebSocket-Key") + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").getBytes(StandardCharsets.UTF_8)))
+                        + "Sec-WebSocket-Accept: " + new String(base64)
+                        //+ Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-1").digest((data.getHeader().get("Sec-WebSocket-Key") + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").getBytes(StandardCharsets.UTF_8)))
                         + "\r\n\r\n");
 
                 InputStream in = data.getIn();
